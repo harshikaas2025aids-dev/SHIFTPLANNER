@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shift Planner | Workforce & Shift Management</title>
+  <meta name="description" content="SaaS workforce management platform for scheduling, rosters, and shift swap approvals.">
+  
+  <!-- Google Fonts: Orbitron & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Line Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div id="app-layout">
+    
+    <!-- ========================================================================== -->
+    <!-- LEFT FIXED SIDEBAR -->
+    <!-- ========================================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">
+          <i data-lucide="calendar"></i>
+        </div>
+        <div class="brand-title">Shift Planner</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-view-target="dashboard" href="#">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-view-target="employees" href="#">
+          <i data-lucide="users"></i>
+          <span>Employees</span>
+        </a>
+        <a class="nav-item" data-view-target="shifts" href="#">
+          <i data-lucide="calendar-range"></i>
+          <span>Shifts</span>
+        </a>
+        <a class="nav-item" data-view-target="rosters" href="#">
+          <i data-lucide="clipboard-list"></i>
+          <span>Rosters</span>
+        </a>
+        <a class="nav-item" data-view-target="swaps" href="#">
+          <i data-lucide="arrow-left-right"></i>
+          <span>Swap Requests</span>
+        </a>
+        <a class="nav-item" data-view-target="reports" href="#">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Reports</span>
+        </a>
+
+        <div class="sidebar-divider"></div>
+
+        <a class="nav-item" data-view-target="settings" href="#">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="nav-item" id="theme-toggle" href="#">
+          <i data-lucide="moon"></i>
+          <span>Toggle Theme</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ========================================================================== -->
+    <!-- MAIN WRAPPER -->
+    <!-- ========================================================================== -->
+    <div class="main-wrapper">
+      
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+            <i data-lucide="menu"></i>
+          </button>
+          <div style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--text-primary);" id="header-page-title">
+            Dashboard Overview
+          </div>
+        </div>
+
+        <div class="header-search">
+          <i data-lucide="search"></i>
+          <input type="text" id="global-search" placeholder="Search employees, shifts, rosters...">
+        </div>
+
+        <div class="header-right">
+          <button class="icon-btn" id="notif-btn" title="Notifications">
+            <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+            <span class="notification-badge-dot"></span>
+          </button>
+
+          <!-- Notifications Panel Dropdown -->
+          <div class="notifications-panel" id="notifications-panel">
+            <div class="notifications-header">
+              <span>System Notifications</span>
+              <i data-lucide="check-check" style="width:16px; cursor:pointer;" title="Mark all read"></i>
+            </div>
+            <div class="notifications-list" id="notifications-list">
+              <!-- Loaded via JavaScript -->
+            </div>
+          </div>
+
+          <div class="user-profile-badge" id="admin-profile-btn" style="position:relative;">
+            <div class="user-avatar">A</div>
+            <span class="user-name">Admin</span>
+            <i data-lucide="chevron-down" style="width:14px; color:var(--text-secondary);"></i>
+          </div>
+
+          <!-- Admin Profile Dropdown Menu -->
+          <div class="admin-dropdown-menu" id="admin-dropdown-menu">
+            <div class="admin-dropdown-header">
+              <div class="admin-avatar-lg">A</div>
+              <div>
+                <div class="admin-dropdown-name">System Admin</div>
+                <div class="admin-dropdown-email">admin@shiftplanner.com</div>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="admin-dropdown-item" data-view-target="settings">
+              <i data-lucide="user" style="width:16px;"></i> Admin Profile
+            </div>
+            <div class="admin-dropdown-item" data-view-target="settings">
+              <i data-lucide="settings" style="width:16px;"></i> System Settings
+            </div>
+            <div class="admin-dropdown-item" id="admin-dropdown-theme-toggle">
+              <i data-lucide="sun-moon" style="width:16px;"></i> Toggle Theme
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="admin-dropdown-item text-danger" id="admin-dropdown-logout">
+              <i data-lucide="log-out" style="width:16px;"></i> Logout
+            </div>
+          </div>
+
+          <div class="date-card-badge">
+            <i data-lucide="calendar" style="width:16px; color:var(--primary-teal);"></i>
+            <span id="header-live-date">Mon, 29 Sep 2026</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA (VIEW VIEWS) -->
+      <main class="content-area">
+        
+        <!-- ==================================================================== -->
+        <!-- VIEW: DASHBOARD -->
+        <!-- ==================================================================== -->
+        <section class="page-view active" id="view-dashboard">
+          
+          <!-- Anime Cyberpunk Command Center Hero Banner -->
+          <div class="anime-hero-banner">
+            <img src="assets/anime_hero_banner.jpg" alt="Workforce Command Center" class="anime-banner-img">
+            <div class="anime-banner-overlay">
+              <div class="anime-badge-pill">
+                <span class="anime-pulse-dot"></span> NEO-KYOTO WORKFORCE HQ
+              </div>
+              <h1 class="anime-hero-title">WORKFORCE COMMAND CENTER</h1>
+              <p class="anime-hero-subtitle">Real-time Anime Shift Scheduling, Roster Dispatch & Swap Protocol</p>
+              <div class="anime-banner-stats-row">
+                <div class="anime-banner-tag"><i data-lucide="shield-check" style="width:14px;"></i> STATUS: OPTIMAL</div>
+                <div class="anime-banner-tag"><i data-lucide="zap" style="width:14px;"></i> SYNC: AUTOMATIC</div>
+                <div class="anime-banner-tag"><i data-lucide="cpu" style="width:14px;"></i> NEON ENGINE v3.6</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Main Statistics Cards -->
+          <div class="grid-4">
+            <div class="stat-card" data-view-target="employees">
+              <div class="stat-main">
+                <div class="stat-icon bg-teal">
+                  <i data-lucide="users"></i>
+                </div>
+                <div>
+                  <div class="stat-title">Total Employees</div>
+                  <div class="stat-value" id="stat-emp-count">0</div>
+                </div>
+              </div>
+              <div class="stat-trend">
+                <i data-lucide="trending-up" style="width:12px;"></i> +8%
+              </div>
+            </div>
+
+            <div class="stat-card" data-view-target="shifts">
+              <div class="stat-main">
+                <div class="stat-icon bg-peach">
+                  <i data-lucide="calendar"></i>
+                </div>
+                <div>
+                  <div class="stat-title">Total Shifts</div>
+                  <div class="stat-value" id="stat-shift-count">0</div>
+                </div>
+              </div>
+              <div class="stat-trend" style="background:#EBE7DF; color:var(--text-secondary);">
+                &rarr; 0%
+              </div>
+            </div>
+
+            <div class="stat-card" data-view-target="swaps">
+              <div class="stat-main">
+                <div class="stat-icon bg-rose">
+                  <i data-lucide="arrow-left-right"></i>
+                </div>
+                <div>
+                  <div class="stat-title">Swap Requests</div>
+                  <div class="stat-value" id="stat-swap-count">0</div>
+                </div>
+              </div>
+              <div class="stat-trend">
+                <i data-lucide="trending-up" style="width:12px;"></i> +25%
+              </div>
+            </div>
+
+            <div class="stat-card" data-view-target="rosters">
+              <div class="stat-main">
+                <div class="stat-icon bg-sage">
+                  <i data-lucide="clipboard-list"></i>
+                </div>
+                <div>
+                  <div class="stat-title">Active Rosters</div>
+                  <div class="stat-value" id="stat-roster-count">0</div>
+                </div>
+              </div>
+              <div class="stat-trend">
+                <i data-lucide="trending-up" style="width:12px;"></i> +8%
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Analytics & Lists Grid -->
+          <div class="grid-3">
+            
+            <!-- Upcoming Shifts Card -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Upcoming Shifts</div>
+                <div class="card-action-link" data-view-target="shifts">View All &rarr;</div>
+              </div>
+              <div class="shift-list" id="upcoming-shifts-list">
+                <!-- Dynamically rendered -->
+              </div>
+            </div>
+
+            <!-- Shift Distribution Donut Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Shift Distribution</div>
+              </div>
+              <div class="chart-container">
+                <div class="donut-chart-wrapper">
+                  <svg class="donut-chart-svg" viewBox="0 0 42 42">
+                    <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#EBE7DF" stroke-width="5"></circle>
+                    <circle id="donut-circle-segment" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#24464A" stroke-width="5" stroke-dasharray="50 100" stroke-dashoffset="0"></circle>
+                  </svg>
+                  <div class="donut-center-text">
+                    <div class="donut-center-value" id="chart-total-count">0</div>
+                    <div class="donut-center-label">Shifts</div>
+                  </div>
+                </div>
+                <div class="chart-legend">
+                  <div class="legend-item">
+                    <div class="legend-label-box">
+                      <span class="legend-color-dot" style="background:#24464A;"></span> Morning
+                    </div>
+                    <div class="legend-val" id="legend-val-morning">0</div>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-label-box">
+                      <span class="legend-color-dot" style="background:#E8B49D;"></span> Afternoon
+                    </div>
+                    <div class="legend-val" id="legend-val-afternoon">0</div>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-label-box">
+                      <span class="legend-color-dot" style="background:#10232D;"></span> Night
+                    </div>
+                    <div class="legend-val" id="legend-val-night">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Swap Requests Card -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Recent Swap Requests</div>
+                <div class="card-action-link" data-view-target="swaps">View All &rarr;</div>
+              </div>
+              <div id="recent-swaps-list">
+                <!-- Dynamically rendered -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Management Tables Preview -->
+          <div class="grid-3">
+            
+            <!-- Employees Quick Table -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i data-lucide="users" style="width:18px;"></i> Employees</div>
+                <button class="btn btn-primary btn-sm" onclick="openAddEmployeeModal()">+ Add Employee</button>
+              </div>
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-emp-tbody">
+                    <!-- Rendered JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Shifts Quick Table -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i data-lucide="calendar" style="width:18px;"></i> Shifts</div>
+                <button class="btn btn-accent btn-sm" onclick="openAddShiftModal()">+ Add Shift</button>
+              </div>
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Date</th>
+                      <th>Start</th>
+                      <th>End</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-shift-tbody">
+                    <!-- Rendered JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Rosters Quick Table -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i data-lucide="clipboard-list" style="width:18px;"></i> Rosters</div>
+                <button class="btn btn-primary btn-sm" onclick="openAssignRosterModal()">+ Assign Roster</button>
+              </div>
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Employee</th>
+                      <th>Shift Date</th>
+                      <th>Shift Time</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-roster-tbody">
+                    <!-- Rendered JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- VIEW: EMPLOYEES PAGE -->
+        <!-- ==================================================================== -->
+        <section class="page-view" id="view-employees">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Employees</h1>
+              <div class="page-subtitle">Manage your workforce and employee roles.</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddEmployeeModal()">
+              <i data-lucide="plus"></i> Add Employee
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employees-tbody">
+                  <!-- JS Rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- VIEW: SHIFTS PAGE -->
+        <!-- ==================================================================== -->
+        <section class="page-view" id="view-shifts">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Shifts</h1>
+              <div class="page-subtitle">Create and manage employee work shifts.</div>
+            </div>
+            <button class="btn btn-accent" onclick="openAddShiftModal()">
+              <i data-lucide="plus"></i> Add Shift
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Shift Category</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="shifts-tbody">
+                  <!-- JS Rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- VIEW: ROSTERS PAGE -->
+        <!-- ==================================================================== -->
+        <section class="page-view" id="view-rosters">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Rosters</h1>
+              <div class="page-subtitle">Assign employees to shifts and manage the weekly schedule.</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAssignRosterModal()">
+              <i data-lucide="plus"></i> Assign Roster
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Shift Date</th>
+                    <th>Shift Time</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rosters-tbody">
+                  <!-- JS Rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- VIEW: SWAP REQUESTS PAGE -->
+        <!-- ==================================================================== -->
+        <section class="page-view" id="view-swaps">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Swap Requests</h1>
+              <div class="page-subtitle">Review, manage and approve employee shift swaps.</div>
+            </div>
+            <button class="btn btn-primary" onclick="openRequestSwapModal()">
+              <i data-lucide="plus"></i> Request Shift Swap
+            </button>
+          </div>
+
+          <!-- Swap Counters -->
+          <div class="grid-4">
+            <div class="card" style="padding:16px;">
+              <div class="stat-title">Pending</div>
+              <div class="stat-value" id="swap-stat-pending" style="color:#F39C12;">0</div>
+            </div>
+            <div class="card" style="padding:16px;">
+              <div class="stat-title">Colleague Accepted</div>
+              <div class="stat-value" id="swap-stat-accepted" style="color:#27AE60;">0</div>
+            </div>
+            <div class="card" style="padding:16px;">
+              <div class="stat-title">Declined</div>
+              <div class="stat-value" id="swap-stat-declined" style="color:#E74C3C;">0</div>
+            </div>
+            <div class="card" style="padding:16px;">
+              <div class="stat-title">Manager Approved</div>
+              <div class="stat-value" id="swap-stat-approved" style="color:var(--primary-teal);">0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Requester</th>
+                    <th>Colleague</th>
+                    <th>Shift Info</th>
+                    <th>Status</th>
+                    <th>Timeline</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="swaps-tbody">
+                  <!-- JS Rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- VIEW: REPORTS PAGE -->
+        <!-- ==================================================================== -->
+        <section class="page-view" id="view-reports">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Workforce Reports</h1>
+              <div class="page-subtitle">Analyze team workload, shift coverage, and swap frequency.</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <select class="form-select" style="width:auto;">
+                <option>This Week</option>
+                <option selected>This Month</option>
+                <option>Custom Range</option>
+              </select>
+              <button class="btn btn-secondary" onclick="window.print()">
+                <i data-lucide="printer"></i> Export Summary
+              </button>
+            </div>
+          </div>
+
+          <div class="grid-4">
+            <div class="card">
+              <div class="stat-title">Total Employees</div>
+              <div class="stat-value" id="report-total-emp">0</div>
+            </div>
+            <div class="card">
+              <div class="stat-title">Scheduled Shifts</div>
+              <div class="stat-value" id="report-total-shifts">0</div>
+            </div>
+            <div class="card">
+              <div class="stat-title">Roster Assignments</div>
+              <div class="stat-value" id="report-total-rosters">0</div>
+            </div>
+            <div class="card">
+              <div class="stat-title">Swap Requests</div>
+              <div class="stat-value" id="report-total-swaps">0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px;">Executive Workforce Summary</div>
+            <p style="font-size:14px; color:var(--text-secondary); line-height:1.6;">
+              Shift Planner maintains high coverage with automatic schedule collision detection.
+              Employees can initiate peer-to-peer shift swap requests, which take effect only after colleague acceptance and final manager approval.
+            </p>
+          </div>
+        </section>
+
+        <!-- ==================================================================== -->
+        <!-- VIEW: SETTINGS PAGE -->
+        <!-- ==================================================================== -->
+        <section class="page-view" id="view-settings">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Settings</h1>
+              <div class="page-subtitle">Configure application settings and preferences.</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px;">Admin Profile</div>
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" value="System Administrator" readonly>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" value="admin@shiftplanner.com" readonly>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <input type="text" class="form-control" value="MANAGER" readonly>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px;">Preferences & Theme</div>
+              <div class="form-group">
+                <label class="form-label">Interface Theme</label>
+                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+                  Toggle between Warm Ivory Light Theme and Deep Teal Dark Theme.
+                </p>
+                <button class="btn btn-secondary" onclick="document.getElementById('theme-toggle').click()">
+                  <i data-lucide="sun-moon"></i> Switch Theme Mode
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================================== -->
+  <!-- MODAL DIALOGS -->
+  <!-- ========================================================================== -->
+
+  <!-- Add/Edit Employee Modal -->
+  <div class="modal-backdrop" id="modal-employee">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-employee-title">Add New Employee</div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-employee">
+        <div class="modal-body">
+          <input type="hidden" id="emp-id">
+          <div class="form-group">
+            <label class="form-label" for="emp-name">Full Name</label>
+            <input type="text" id="emp-name" class="form-control" placeholder="e.g. Employee A" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="emp-email">Email Address</label>
+            <input type="email" id="emp-email" class="form-control" placeholder="employeea@gmail.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="emp-role">Role</label>
+            <select id="emp-role" class="form-select" required>
+              <option value="EMPLOYEE">EMPLOYEE</option>
+              <option value="MANAGER">MANAGER</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Employee</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Shift Modal -->
+  <div class="modal-backdrop" id="modal-shift">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-shift-title">Add New Shift</div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-shift">
+        <div class="modal-body">
+          <input type="hidden" id="shift-id">
+          <div class="form-group">
+            <label class="form-label" for="shift-date">Shift Date</label>
+            <input type="date" id="shift-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shift-start">Start Time</label>
+            <input type="time" id="shift-start" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shift-end">End Time</label>
+            <input type="time" id="shift-end" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Shift</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Assign Roster Modal -->
+  <div class="modal-backdrop" id="modal-roster">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Assign Roster</div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-roster">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="roster-emp-select">Select Employee</label>
+            <select id="roster-emp-select" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="roster-shift-select">Select Shift</label>
+            <select id="roster-shift-select" class="form-select" required></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Assign Roster</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Request Swap Modal -->
+  <div class="modal-backdrop" id="modal-swap">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Request Shift Swap</div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <form id="form-swap">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="swap-roster-select">Target Roster</label>
+            <select id="swap-roster-select" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="swap-req-select">Requester Employee</label>
+            <select id="swap-req-select" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="swap-col-select">Target Colleague</label>
+            <select id="swap-col-select" class="form-select" required></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Send Swap Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Swap Workflow Status Timeline Modal -->
+  <div class="modal-backdrop" id="modal-swap-timeline">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Swap Request Workflow</div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="timeline-flow">
+          <div class="timeline-line"></div>
+          
+          <div class="timeline-step completed" id="tl-step-1">
+            <div class="step-node">1</div>
+            <div class="step-label">Requested</div>
+          </div>
+          <div class="timeline-step" id="tl-step-2">
+            <div class="step-node">2</div>
+            <div class="step-label">Colleague</div>
+          </div>
+          <div class="timeline-step" id="tl-step-3">
+            <div class="step-node">3</div>
+            <div class="step-label">Manager</div>
+          </div>
+          <div class="timeline-step" id="tl-step-4">
+            <div class="step-node">4</div>
+            <div class="step-label">Applied</div>
+          </div>
+        </div>
+
+        <div id="swap-timeline-details">
+          <!-- JS Rendered Details -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-modal-close>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="modal-delete-confirm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Confirm Delete</div>
+        <button class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="delete-target-label" style="font-size:14.5px; color:var(--text-primary);">
+          Are you sure you want to delete this record? This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button class="btn btn-danger" id="btn-do-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript App Entry -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
